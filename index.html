@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hymn of Death | A Cinematic Tribute</title>
+    <!-- Tailwind CSS for Layouts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Merriweather (Serif) for headers, Lato for body, Pinyon Script for quotes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- 
+    =======================================================================
+    CSS SECTION (Save as style.css)
+    =======================================================================
+    -->
+    <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #aa8c2c;
+            --bg-black: #050505;
+            --bg-paper: #1a1a1a;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--text-main);
+            font-family: 'Lato', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.5s;
+        }
+
+        h1, h2, h3, .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .cinzel-font {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .script-font {
+            font-family: 'Pinyon Script', cursive;
+        }
+
+        /* --- FILM GRAIN EFFECT --- */
+        .film-grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--gold);
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* --- ANIMATIONS --- */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+        
+        .btn-animate {
+            animation: pulse-gold 2s infinite;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(5,5,5,1) 100%);
+        }
+
+        /* NEW: GLOWING LINE STYLE */
+        .glowing-line {
+            height: 2px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 2rem auto;
+            background: radial-gradient(circle, rgba(212,175,55,1) 0%, rgba(212,175,55,0) 90%);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+            opacity: 0.8;
+        }
+
+        /* --- CAST CARDS --- */
+        .cast-card {
+            transition: transform 0.4s ease, border-color 0.3s ease;
+        }
+        .cast-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+        }
+        .cast-image {
+            filter: grayscale(100%) sepia(20%);
+            transition: filter 0.5s ease;
+            object-position: top; /* Keep focus on faces */
+        }
+        .cast-card:hover .cast-image {
+            filter: grayscale(0%);
+        }
+
+        /* --- VIDEO PLAYER UI --- */
+        .tab-btn.active {
+            border-bottom: 2px solid var(--gold);
+            color: var(--gold);
+        }
+        .video-list-item {
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .video-list-item:hover {
+            background-color: rgba(212, 175, 55, 0.1);
+        }
+        .video-list-item.playing {
+            border-left: 3px solid var(--gold);
+            background-color: rgba(212, 175, 55, 0.05);
+            padding-left: 12px;
+        }
+
+        /* --- CINEMA MODE --- */
+        #cinema-overlay {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 60;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        body.cinema-on #cinema-overlay { opacity: 0.95; pointer-events: auto; }
+        body.cinema-on #navbar { opacity: 0; pointer-events: none; }
+        body.cinema-on .video-wrapper-elevated { 
+            z-index: 70; 
+            position: relative; 
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
+            transform: scale(1.02);
+            transition: transform 0.5s ease;
+        }
+
+        /* --- GALLERY --- */
+        .gallery-item {
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .gallery-item img {
+            transition: transform 0.7s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Lightbox Modal */
+        #lightbox-modal {
+            transition: opacity 0.3s ease;
+        }
+        
+        /* --- MUSIC PLAYER & VISUALIZER --- */
+        .vinyl-spin {
+            animation: spin 5s linear infinite;
+        }
+        .vinyl-paused {
+            animation-play-state: paused;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Audio Visualizer */
+        .visualizer { display: flex; gap: 4px; height: 30px; align-items: flex-end; justify-content: center; margin-top: 15px; opacity: 0; transition: opacity 0.3s;}
+        .visualizer.active { opacity: 1; }
+        .bar { width: 4px; background: var(--gold); height: 2px; border-radius: 2px; }
+        .visualizer.active .bar { animation: sound 0.5s ease-in-out infinite alternate; }
+        .visualizer.active .bar:nth-child(1) { animation-duration: 474ms; }
+        .visualizer.active .bar:nth-child(2) { animation-duration: 433ms; }
+        .visualizer.active .bar:nth-child(3) { animation-duration: 407ms; }
+        .visualizer.active .bar:nth-child(4) { animation-duration: 458ms; }
+        .visualizer.active .bar:nth-child(5) { animation-duration: 400ms; }
+        @keyframes sound { 0% { height: 4px; opacity: 0.3; } 100% { height: 25px; opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Film Grain Overlay -->
+    <div class="film-grain"></div>
+
+    <!-- Cinema Mode Overlay -->
+    <div id="cinema-overlay"></div>
+    
+    <!-- Lightbox Modal (Hidden by default) -->
+    <div id="lightbox-modal" class="fixed inset-0 z-[1000] bg-black/90 hidden flex items-center justify-center p-4 opacity-0 pointer-events-none" onclick="closeLightbox()">
+        <div class="relative max-w-[80vw] max-h-[80vh]">
+            <button class="absolute -top-10 right-0 text-white hover:text-[#d4af37] transition" onclick="closeLightbox()">
+                <i data-lucide="x" class="w-8 h-8"></i>
+            </button>
+            <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] border border-[#d4af37] shadow-[0_0_30px_rgba(212,175,55,0.2)] object-contain">
+            <p class="text-center text-gray-400 mt-4 serif-font text-sm tracking-widest">THE HYMN OF DEATH</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-xl cinzel-font text-white tracking-widest cursor-pointer" onclick="window.scrollTo(0,0)">
+                HYMN OF <span style="color: var(--gold);">DEATH</span>
+            </div>
+            <ul class="hidden md:flex space-x-8 text-sm uppercase tracking-widest text-gray-300">
+                <li><a href="#story" class="nav-link hover:text-[#d4af37]">True Story</a></li>
+                <li><a href="#cast" class="nav-link hover:text-[#d4af37]">Cast</a></li>
+                <li><a href="#watch" class="nav-link hover:text-[#d4af37]">Watch</a></li>
+                <li><a href="#gallery" class="nav-link hover:text-[#d4af37]">Gallery</a></li>
+                <li><a href="#music" class="nav-link hover:text-[#d4af37]">Music</a></li>
+            </ul>
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden bg-black border-t border-gray-800 absolute w-full">
+            <a href="#story" class="block py-3 px-6 text-gray-300 border-b border-gray-900" onclick="toggleMobileMenu()">True Story</a>
+            <a href="#cast" class="block py-3 px-6 text-gray-300 border-b border-gray-900" onclick="toggleMobileMenu()">Cast</a>
+            <a href="#watch" class="block py-3 px-6 text-gray-300 border-b border-gray-900" onclick="toggleMobileMenu()">Watch</a>
+            <a href="#gallery" class="block py-3 px-6 text-gray-300" onclick="toggleMobileMenu()">Gallery</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative h-screen flex items-center justify-center text-center overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://accidentallyinlove.home.blog/wp-content/uploads/2019/04/the-hymn-of-death-1.jpg?w=694&h=391" alt="Hymn of Death Poster" class="w-full h-full object-cover object-center opacity-60">
+        </div>
+        <div class="absolute inset-0 hero-overlay z-10"></div>
+        
+        <div class="relative z-20 px-4 max-w-4xl mx-auto">
+            <div class="mb-4 text-[#d4af37] tracking-[0.3em] uppercase text-sm fade-in-up" style="transition-delay: 0.1s;">Based on a True Story</div>
+            <h1 class="text-5xl md:text-7xl text-white mb-6 font-serif fade-in-up" style="transition-delay: 0.3s;">The Hymn of Death</h1>
+            
+            <!-- CHANGED: Glowing Line Replacement -->
+            <div class="glowing-line fade-in-up" style="transition-delay: 0.5s;"></div>
+            
+            <!-- Script Quote -->
+            <p class="text-3xl md:text-4xl text-gray-200 script-font mb-8 fade-in-up" style="transition-delay: 0.6s;">
+                "I love you. That is why I am leaving."
+            </p>
+
+            <!-- CHANGED: Quote with ID for Rotator -->
+            <p id="hero-quote" class="text-lg md:text-xl text-gray-400 italic serif-font mb-10 fade-in-up h-8 transition-opacity duration-1000" style="transition-delay: 0.7s;">
+                "Are you truly living? No, I am yearning for death in order to truly live."
+            </p>
+            
+            <!-- NEW: Animated Button -->
+            <a href="#watch" class="inline-block border border-[#d4af37] text-[#d4af37] px-8 py-3 uppercase tracking-widest text-sm hover:bg-[#d4af37] hover:text-black transition duration-300 fade-in-up btn-animate" style="transition-delay: 0.9s;">
+                Watch The Story
+            </a>
+        </div>
+    </header>
+
+    <!-- True Story Section -->
+    <section id="story" class="py-24 px-6 bg-[#0a0a0a]">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="fade-in-up">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdqvodMmVMs7VAo5-6YxYK7A5vfccXMWmXqw&s" alt="Real Yun Sim-deok" class="rounded-sm shadow-2xl border border-gray-800 sepia opacity-80 hover:opacity-100 transition duration-500 w-full object-cover h-[500px]">
+                    <p class="text-xs text-center text-gray-500 mt-2 italic">The real Yun Sim-deok (1897–1926)</p>
+                </div>
+                <div class="fade-in-up">
+                    <h2 class="text-4xl text-[#d4af37] mb-6">The Tragedy of 1926</h2>
+                    <p class="text-gray-400 mb-6 leading-relaxed text-lg serif-font">
+                        In the dark era of the Japanese occupation, two brilliant souls met in Tokyo. <strong class="text-white">Yun Sim-deok</strong>, Korea's first professional soprano, and <strong class="text-white">Kim U-jin</strong>, a genius playwright constrained by duty.
+                    </p>
+                    <p class="text-gray-400 mb-6 leading-relaxed text-lg serif-font">
+                        Their love was a rebellion against a world that tried to silence them. Unable to find freedom in life, they sought it in death. On August 4, 1926, aboard a ferry crossing the Korea Strait, they vanished into the dark waters together, leaving behind only their art.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed text-lg serif-font border-l-2 border-[#d4af37] pl-4 italic">
+                        "I am leaving this world, where money is everything, to go to a place where love is everything."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cast Section -->
+    <section id="cast" class="py-24 px-6 bg-[#0f0f0f]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="text-3xl md:text-4xl mb-4">The Principal Cast</h2>
+                <div class="h-px w-12 bg-[#d4af37] mx-auto"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Cast 1 (Adjusted Height) -->
+                <div class="cast-card bg-[#1a1a1a] border border-gray-800 p-4 fade-in-up">
+                    <!-- Changed from aspect-[3/4] to h-64 for reduced height -->
+                    <div class="h-64 overflow-hidden mb-4 relative">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/27/240314_Lee_Jong-suk.jpg" alt="Lee Jong-suk" class="cast-image w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl text-white text-center">Lee Jong-suk</h3>
+                    <p class="text-[#d4af37] text-center text-sm uppercase tracking-wider mt-1">Kim U-jin</p>
+                    <p class="text-gray-500 text-center text-xs mt-3 px-4">The tortured genius playwright who finds his muse in the darkness.</p>
+                </div>
+
+                <!-- Cast 2 (Adjusted Height) -->
+                <div class="cast-card bg-[#1a1a1a] border border-gray-800 p-4 fade-in-up" style="transition-delay: 0.1s;">
+                     <!-- Changed from aspect-[3/4] to h-64 for reduced height -->
+                    <div class="h-64 overflow-hidden mb-4 relative">
+                        <img src="https://e0.pxfuel.com/wallpapers/339/327/desktop-wallpaper-shin-hye-sun-%EC%8B%A0%ED%98%9C%EC%84%A0-gallery-hancinema-the-korean-movie-and-drama-database.jpg" alt="Shin Hye-sun" class="cast-image w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl text-white text-center">Shin Hye-sun</h3>
+                    <p class="text-[#d4af37] text-center text-sm uppercase tracking-wider mt-1">Yun Sim-deok</p>
+                    <p class="text-gray-500 text-center text-xs mt-3 px-4">Korea's first soprano who sings the song of death.</p>
+                </div>
+
+                <!-- Cast 3 (Adjusted Height) -->
+                <div class="cast-card bg-[#1a1a1a] border border-gray-800 p-4 fade-in-up" style="transition-delay: 0.2s;">
+                     <!-- Changed from aspect-[3/4] to h-64 for reduced height -->
+                    <div class="h-64 overflow-hidden mb-4 relative">
+                        <img src="https://1.vikiplatform.com/pr/14696pr/39cc5f9082.jpg?x=b" alt="Lee Ji-hoon" class="cast-image w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl text-white text-center">Lee Ji-hoon</h3>
+                    <p class="text-[#d4af37] text-center text-sm uppercase tracking-wider mt-1">Hong Nan-pa</p>
+                    <p class="text-gray-500 text-center text-xs mt-3 px-4">A friend and fellow musician who witnesses their sorrow.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Watch Section (Tabs + Player) -->
+    <section id="watch" class="py-24 px-6 bg-[#050505]">
+        <div class="max-w-6xl mx-auto video-wrapper-elevated">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 fade-in-up">
+                <div class="text-center md:text-left">
+                    <h2 class="text-3xl md:text-4xl mb-4">Watch & Experience</h2>
+                    <p class="text-gray-500">Curated collection of episodes, trailers, and fan edits.</p>
+                </div>
+                
+                <!-- NEW: Cinema Mode Button -->
+                <button onclick="toggleCinemaMode()" class="mt-4 md:mt-0 border border-[#d4af37] text-[#d4af37] px-6 py-2 uppercase tracking-widest text-xs flex items-center hover:bg-[#d4af37] hover:text-black transition">
+                    <i data-lucide="monitor" class="w-4 h-4 mr-2"></i> Cinema Mode
+                </button>
+            </div>
+
+            <div class="bg-[#111] border border-gray-800 rounded-lg overflow-hidden shadow-2xl fade-in-up">
+                <!-- Video Player -->
+                <div class="aspect-w-16 aspect-h-9 bg-black relative" style="padding-bottom: 56.25%;">
+                    <iframe id="main-player" class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/5QxdSiwK-nw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+
+                <!-- Controls & Playlist -->
+                <div class="flex flex-col md:flex-row">
+                    <!-- Tabs -->
+                    <div class="w-full md:w-1/3 border-r border-gray-800 bg-[#161616]">
+                        <div class="flex border-b border-gray-800">
+                            <button onclick="switchTab('episodes')" id="tab-episodes" class="tab-btn flex-1 py-4 text-sm font-bold uppercase tracking-wide text-gray-400 hover:text-white transition">Episodes</button>
+                            <button onclick="switchTab('trailers')" id="tab-trailers" class="tab-btn flex-1 py-4 text-sm font-bold uppercase tracking-wide text-gray-400 hover:text-white transition active">Trailers</button>
+                            <button onclick="switchTab('edits')" id="tab-edits" class="tab-btn flex-1 py-4 text-sm font-bold uppercase tracking-wide text-gray-400 hover:text-white transition">Edits</button>
+                        </div>
+                        
+                        <!-- List Content: Episodes -->
+                        <div id="list-episodes" class="hidden h-64 overflow-y-auto custom-scrollbar">
+                            <div class="p-4 text-xs text-gray-500 italic border-b border-gray-800">
+                                Note: Please replace the placeholder Drive links in the code with your actual file IDs.
+                            </div>
+                            <!-- Example Drive Links (Placeholders) -->
+                            <div onclick="playVideo('https://drive.google.com/file/d/1Iqy6xKgX8hOQQvE3OEqJwi4oKynpvC-P/preview', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="play-circle" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Episode 1</div>
+                                    <div class="text-xs text-gray-500">The Meeting</div>
+                                </div>
+                            </div>
+                            <div onclick="playVideo('https://drive.google.com/file/d/1ax4XRCj1f1oXN3p9D_ADkZ9q41nY-QFJ/preview', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="play-circle" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Episode 2</div>
+                                    <div class="text-xs text-gray-500">The Conflict</div>
+                                </div>
+                            </div>
+                             <div onclick="playVideo('https://drive.google.com/file/d/1lcPnmiWgXp0xq7RCIWpQolNZN0V3qioo/preview', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="play-circle" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Episode 3</div>
+                                    <div class="text-xs text-gray-500">The End</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- List Content: Trailers -->
+                        <div id="list-trailers" class="h-64 overflow-y-auto custom-scrollbar">
+                            <div onclick="playVideo('https://www.youtube.com/embed/5QxdSiwK-nw', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center playing">
+                                <i data-lucide="film" class="w-4 h-4 mr-3 text-[#d4af37]"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Official Netflix Trailer</div>
+                                    <div class="text-xs text-gray-500">2 min 30 sec</div>
+                                </div>
+                            </div>
+                            <div onclick="playVideo('https://www.youtube.com/embed/ZAqk5PBqSa4?si=KiBmhm0DL8uhuSoZ', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="film" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Teaser Trailer</div>
+                                    <div class="text-xs text-gray-500">45 sec</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- List Content: Edits -->
+                        <div id="list-edits" class="hidden h-64 overflow-y-auto custom-scrollbar">
+                             <div onclick="playVideo('https://drive.google.com/file/d/1iqN5P33BGNsavSAncpCVmhJY3ty2Gs91/preview', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="heart" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Sad Edit - "Tragedy"</div>
+                                    <div class="text-xs text-gray-500">Fan Made</div>
+                                </div>
+                            </div>
+                             <div onclick="playVideo('https://drive.google.com/file/d/1S5KkN06Kua65qO3iR8PLWD2SvH32Ugtv/preview', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="heart" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Edit</div>
+                                    <div class="text-xs text-gray-500">Google Drive Source</div>
+                                </div>
+                            </div>
+                            <div onclick="playVideo('https://drive.google.com/file/d/1r2q6tD4lh25kamr4bdx51rtKfBRrapNq/preview', this)" class="video-list-item p-4 border-b border-gray-800 flex items-center">
+                                <i data-lucide="heart" class="w-4 h-4 mr-3 text-gray-500"></i>
+                                <div>
+                                    <div class="text-sm text-gray-200">Edit</div>
+                                    <div class="text-xs text-gray-500">Google Drive Source</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description Panel -->
+                    <div class="w-full md:w-2/3 p-6 bg-[#0a0a0a]">
+                        <h3 class="text-xl text-[#d4af37] mb-2 serif-font">Now Playing</h3>
+                        <p id="video-desc" class="text-gray-400 text-sm leading-relaxed">
+                            Select a video from the list to begin watching. Experience the beautiful cinematography and heartbreaking story of "The Hymn of Death".
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-24 px-6 bg-[#0f0f0f]">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-center text-3xl md:text-4xl mb-12 fade-in-up">Aesthetic Archive</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
+                <!-- Aesthetic 1 (Large) -->
+                <div class="gallery-item col-span-2 row-span-2 fade-in-up" onclick="openLightbox(this)">
+                    <img src="https://i.ytimg.com/vi/GWoepyftbEU/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAaT8MPQTWkcW4UpDkQF0XXqRbGUw" alt="Aesthetic Scene" class="w-full h-full object-cover">
+                </div>
+                <!-- Aesthetic 2 -->
+                <div class="gallery-item fade-in-up" onclick="openLightbox(this)">
+                    <img src="https://kdramakween.home.blog/wp-content/uploads/2019/03/hymnofdeath.jpg" alt="Writing" class="w-full h-full object-cover">
+                </div>
+                <!-- Aesthetic 3 -->
+                <div class="gallery-item fade-in-up" onclick="openLightbox(this)">
+                    <img src="https://i0.wp.com/thefangirlverdict.com/wp-content/uploads/2022/05/Hymn-Of-Death-011.png?resize=764%2C430&ssl=1" alt="Stare" class="w-full h-full object-cover">
+                </div>
+                <!-- Aesthetic 4 -->
+                <div class="gallery-item fade-in-up" onclick="openLightbox(this)">
+                    <img src="https://m.media-amazon.com/images/M/MV5BNTI4ZDViZWEtODU2Ny00Nzc0LWEyZTQtMjJiMWQ2NDBkYjMyXkEyXkFqcGc@._V1_.jpg" alt="Beach" class="w-full h-full object-cover">
+                </div>
+                <!-- Aesthetic 5 -->
+                <div class="gallery-item fade-in-up" onclick="openLightbox(this)">
+                    <img src="https://i.ytimg.com/vi/G2e33hYrZvk/maxresdefault.jpg" alt="Walking" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <p class="text-center text-gray-500 text-xs mt-6 tracking-widest">CLICK IMAGES TO EXPAND</p>
+        </div>
+    </section>
+
+    <!-- Music/Footer Section -->
+    <section id="music" class="py-20 px-6 bg-[#050505] border-t border-gray-900">
+        <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
+            <i data-lucide="disc" class="w-16 h-16 text-[#d4af37] mx-auto mb-6 vinyl-spin vinyl-paused" id="disc-icon"></i>
+            
+            <!-- NEW: Audio Visualizer -->
+            <div id="audio-visualizer" class="visualizer mb-4">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+
+            <h2 class="text-2xl text-white mb-2 serif-font">He Hymn of Death (OST)</h2>
+            <p class="text-gray-500 mb-8">"Only My Heart Knows" - Sohyang</p>
+            
+            <div class="flex justify-center space-x-6 mb-12">
+                <!-- Note: Browsers block auto-play audio. This simulates the player -->
+                <button class="border border-gray-700 rounded-full p-4 hover:border-[#d4af37] hover:text-[#d4af37] transition" onclick="toggleMusic()">
+                    <i data-lucide="play" id="play-icon" class="fill-current"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-gray-600 uppercase tracking-widest mt-16">
+                Designed for the Memory of Kim U-jin & Yun Sim-deok<br>
+                2025 Fan Project
+            </p>
+        </div>
+    </section>
+
+    <!-- 
+    =======================================================================
+    JAVASCRIPT SECTION (Save as script.js)
+    =======================================================================
+    -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // SCROLL ANIMATION OBSERVER
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
+        // VIDEO PLAYER LOGIC
+        function switchTab(tabName) {
+            // Hide all lists
+            document.getElementById('list-episodes').classList.add('hidden');
+            document.getElementById('list-trailers').classList.add('hidden');
+            document.getElementById('list-edits').classList.add('hidden');
+            
+            // Deactivate all buttons
+            document.getElementById('tab-episodes').classList.remove('active');
+            document.getElementById('tab-trailers').classList.remove('active');
+            document.getElementById('tab-edits').classList.remove('active');
+
+            // Show selected list & activate button
+            document.getElementById('list-' + tabName).classList.remove('hidden');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function playVideo(url, element) {
+            // Update Iframe
+            document.getElementById('main-player').src = url;
+
+            // Remove 'playing' class from all items
+            document.querySelectorAll('.video-list-item').forEach(item => {
+                item.classList.remove('playing');
+                // Remove the gold icon color from previous
+                const icon = item.querySelector('svg');
+                if(icon) icon.classList.replace('text-[#d4af37]', 'text-gray-500');
+            });
+
+            // Add 'playing' class to clicked item
+            element.classList.add('playing');
+            
+            // Highlight icon
+            const icon = element.querySelector('svg');
+            if(icon) icon.classList.replace('text-gray-500', 'text-[#d4af37]');
+
+            // Update description text based on video title
+            const title = element.querySelector('.text-sm').innerText;
+            document.getElementById('video-desc').innerText = "Now Playing: " + title;
+        }
+
+        // MOBILE MENU
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- MUSIC PLAYER LOGIC ---
+        // Your OST: "Only My Heart Knows"
+        const audioSource = "https://drive.google.com/file/d/1idY53ef88SstX0pYhPtSwWKGoMTOb3cH/preview";
+        const audio = new Audio(audioSource);
+        audio.loop = true; // Loops music automatically
+
+        let isPlaying = false;
+
+        function toggleMusic() {
+            const disc = document.getElementById('disc-icon');
+            const visualizer = document.getElementById('audio-visualizer');
+            
+            isPlaying = !isPlaying;
+            
+            if (isPlaying) {
+                // START VISUALS
+                disc.classList.remove('vinyl-paused');
+                visualizer.classList.add('active');
+                
+                // ATTEMPT TO PLAY
+                // Note: It may take a few seconds to buffer from Google Drive
+                audio.play().catch(error => {
+                    console.error("Audio Error:", error);
+                    alert("Buffering... If music doesn't start in a few seconds, please try clicking again.");
+                    
+                    // Reset UI if failed immediately
+                    isPlaying = false;
+                    disc.classList.add('vinyl-paused');
+                    visualizer.classList.remove('active');
+                });
+
+            } else {
+                // PAUSE
+                disc.classList.add('vinyl-paused');
+                visualizer.classList.remove('active');
+                audio.pause();
+            }
+        }
+        
+        // NEW: CINEMA MODE
+        function toggleCinemaMode() {
+            document.body.classList.toggle('cinema-on');
+        }
+
+        // NEW: QUOTE ROTATOR
+        const quotes = [
+            "\"Are you truly living? No, I am yearning for death in order to truly live.\"",
+            "\"Your heart is not here. It is somewhere else.\"",
+            "\"My hope is that you live a life that is entirely yours.\""
+        ];
+        let quoteIndex = 0;
+        const quoteEl = document.getElementById('hero-quote');
+        
+        if (quoteEl) {
+            setInterval(() => {
+                quoteEl.style.opacity = 0; // Fade out
+                setTimeout(() => {
+                    quoteIndex = (quoteIndex + 1) % quotes.length;
+                    quoteEl.innerText = quotes[quoteIndex];
+                    quoteEl.style.opacity = 1; // Fade in
+                }, 1000);
+            }, 4000);
+        }
+
+        // NEW: LIGHTBOX LOGIC
+        const lightbox = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        function openLightbox(element) {
+            const img = element.querySelector('img');
+            lightboxImg.src = img.src;
+            lightbox.classList.remove('hidden');
+            setTimeout(() => {
+                lightbox.style.opacity = 1;
+                lightbox.style.pointerEvents = 'auto';
+            }, 10);
+        }
+
+        function closeLightbox() {
+            lightbox.style.opacity = 0;
+            lightbox.style.pointerEvents = 'none';
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
